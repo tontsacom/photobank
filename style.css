@@ -1,0 +1,21 @@
+body {
+	margin: 5px;
+	color: #131313;
+}
+h1 {
+	text-align: center;
+}
+.nav {
+	margin-bottom: 10px;
+}
+.photobank img {
+	width: 33%;
+}
+.floortiles-wrapper {
+	position: relative;
+	max-width: 100%;
+	margin: 0 auto;
+}
+.floortiles-wrapper > [data-tile] {
+	overflow:hidden;
+}
