@@ -18,4 +18,8 @@ h1 {
 }
 .floortiles-wrapper > [data-tile] {
 	overflow:hidden;
+	background: url(img/scale.svg) no-repeat center;
+}
+.floortiles-wrapper img {
+	opacity: .7;
 }

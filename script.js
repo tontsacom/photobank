@@ -104,6 +104,9 @@ jQuery(document).ready(function($) {
 						'margin-left': left + 'px'
 					});
 					crop
+						.css({
+							'background-size': '' + ((width - left) / width * 100) + '% 100%'
+						})
 						.attr('data-toggle', 'tooltip')
 						.attr('title', 'horizont crop ' + Math.round(width + left * 2) + 'x' + height + ' from ' + widthOrigin + 'x' + heightOrigin + ' (' + (-left / width * 100).toFixed(2) + '%)');
 				} else {
@@ -112,6 +115,9 @@ jQuery(document).ready(function($) {
 						'margin-top': top + 'px'
 					});
 					crop
+						.css({
+							'background-size': '100% ' + ((height - top) / height * 100) + '%'
+						})
 						.attr('data-toggle', 'tooltip')
 						.attr('title', 'vertical crop ' + width + 'x' + Math.round(height + top * 2) + ' from ' + widthOrigin + 'x' + heightOrigin + ' (' + (-top / height * 100).toFixed(2) + '%)');
 				}
