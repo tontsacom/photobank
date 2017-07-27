@@ -9,7 +9,7 @@
 			x: 6,
 			y: 4
 		},
-		maxWidth: 800,
+		maxWidth: 1000,
 		gap: 3,
 		minCol: 2,
 		maxCol: 6,
@@ -38,9 +38,11 @@
 				if (childs.get(i).tagName != tag) throw new Error('Не однородный по тегу состав плиток in jQuery.floortiles');
 			}
 
-			this.$element.wrapInner('<div class="floortiles-wrapper" />');
+			this.$element.wrapInner('<div class="floortiles-wrapper" style="position: relative;max-width: 100%;margin: 0 auto;" />');
+			this.tiles = [];
 			this.spaces = [];
 			this.holes = [];
+			this.poses = [];
 			for (var option in optionsDefault) {
 				this[option] = optionsDefault[option];
 			}
@@ -86,18 +88,20 @@
 
 		refresh() {
 
+			var childs = this.$element.children().children();
+			this.tiles.length = 0;
+			for (var i = 0; i < childs.length; i++) {
+				var size = this.minSizeTile(childs.eq(i).data('tile'));
+				this.tiles.push({
+					i: i,
+					x: size.x,
+					y: size.y
+				});
+			}
+
 			this.width = Math.min(this.$element.width(), this.maxWidth);
 			var c = Math.ceil((this.width + this.gap) / this.tileSize.x);
 			this.columns = Math.max(Math.min(c, this.maxCol), this.minCol);
-			this.holes.length = 0;
-			this.spaces.length = 0;
-			for (var i = 0; i < this.columns; i++) {
-				this.spaces[i] = {
-					x: i,
-					y: 0,
-					v: 0
-				};
-			}
 
 			var wrapper = this.$element.find('.floortiles-wrapper'),
 				childs = wrapper.children(),
@@ -106,11 +110,32 @@
 				tileR,
 				pos,
 				posR,
-				sizeR;
-			for (var i = 0; i < childs.length; i++) {
-				tile = childs.eq(i).data('tile');
-				pos = this.sit(tile);
-				tile = this.boundSize(tile);
+				sizeR,
+				saveTile;
+
+			var time = performance.now();
+
+			this.sitAll();
+			for (var i = 0; this.holes.length > 0 && i < 100; i++) {
+				for (var j = 1; j < this.tiles.length; j++) {
+					if (this.tiles[j].i == this.holes[0].i) break;
+				};
+				while (j--) {
+					if (this.tiles[j].x != this.tiles[j + 1].x) break;
+				} 
+				saveTile = this.tiles[j + 1];
+				this.tiles[j + 1] = this.tiles[j];
+				this.tiles[j] = saveTile;
+				this.sitAll();
+			}
+
+			time = performance.now() - time;
+			console.log('Время выполнения = ', time);
+			console.log(i);
+
+			for (var i = 0; i < this.tiles.length; i++) {
+				pos = this.poses[i];
+				tile = this.boundSize(this.tiles[i]);
 				tileR = this.boundSizeR(tile);
 				posR = {
 					x: step.x * pos.x,
@@ -120,15 +145,15 @@
 					x: step.x * tileR.x - this.gap,
 					y: step.y * tileR.v - this.gap
 				};
-				this.tiled(childs.eq(i), {
-					index: i, 
+				this.tiled(childs.eq(this.tiles[i].i), {
+					index: this.tiles[i].i, 
 					tile: tile, 
 					pos: posR,
 					size: sizeR,
 					tileSize: this.tileSize
 				});
 				if (this.animate && this.nextStatus) {
-					childs.eq(i).animate(
+					childs.eq(this.tiles[i].i).animate(
 						{
 							width: sizeR.x + 'px',
 							height: sizeR.y +'px',
@@ -138,7 +163,7 @@
 						this.animateTime
 					);
 				} else {
-					childs.eq(i).css({
+					childs.eq(this.tiles[i].i).css({
 						position: 'absolute',
 						width: sizeR.x + 'px',
 						height: sizeR.y +'px',
@@ -153,6 +178,23 @@
 			});
 		}
 
+		sitAll() {
+			this.holes.length = 0;
+			this.spaces.length = 0;
+			for (var i = 0; i < this.columns; i++) {
+				this.spaces[i] = {
+					x: i,
+					y: 0,
+					v: 0,
+					i: 0
+				};
+			}
+			this.poses.length = 0;
+			for (var i = 0; i < this.tiles.length; i++) {
+				this.poses.push(this.sit(this.tiles[i]));
+			}
+		}
+
 		sit(tile) {
 			var sitTile = this.boundSize(tile),
 				findTile;
@@ -163,7 +205,8 @@
 				findTile = {
 					x: 0,
 					y: this.maxSpaces(0, this.spaces.length),
-					v: this.maxSpacesV(0, this.spaces.length)
+					v: this.maxSpacesV(0, this.spaces.length),
+					i: tile.i
 				};
 
 				for (var i = 0; i < this.spaces.length; i++) {
@@ -171,13 +214,15 @@
 						this.holes.push({
 							x: this.spaces[i].x,
 							y: j,
-							v: j - this.spaces[i].y + this.spaces[i].v
+							v: j - this.spaces[i].y + this.spaces[i].v,
+							i: tile.i
 						});
 					};
 					this.spaces[i] = {
 						x: i,
 						y: findTile.y + sitTile.y,
-						v: findTile.v + sitTile.v
+						v: findTile.v + sitTile.v,
+						i: tile.i
 					};
 				};
 
@@ -192,7 +237,8 @@
 				spacesM[i] = {
 					x: i,
 					y: this.maxSpaces(i, i + sitTile.x),
-					v: this.maxSpacesV(i, i + sitTile.x)
+					v: this.maxSpacesV(i, i + sitTile.x),
+					i: tile.i
 				};
 			}
 
@@ -233,19 +279,25 @@
 				this.holes.splice(i, j);
 				for (; j < sitTile.x; j++) {
 					for (var k = this.spaces[findTile.x + j].y; k < findTile.y; k++) {
-						this.holes.push({x: this.spaces[findTile.x + j].x, y: k});
+						this.holes.push({
+							x: this.spaces[findTile.x + j].x,
+							y: k,
+							v: k, // надо разобраться с этим, ранее было пропущено определение v
+							i: tile.i
+						});
 					}
 					this.spaces[findTile.x + j] = {
 						x: this.spaces[findTile.x + j].x,
 						y: findTile.y + sitTile.y,
-						v: findTile.v + sitTile.v
+						v: findTile.v + sitTile.v,
+						i: tile.i
 					};
 				}
 				for (var k = 1; k < sitTile.y; k++) {
 					for (; i < this.holes.length; i++) {
 						if (this.holes[i].x == findTile.x && this.holes[i].y == findTile.y + k) break;
 					}
-					for (var j = 1; j < sitTile.x; j++) {
+					for (var j = 1; j < sitTile.x && i + j < this.holes.length; j++) {
 						if (this.holes[i + j].x != findTile.x + j || this.holes[i + j].y != findTile.y + k) break;
 					}
 					this.holes.splice(i, j);
@@ -261,13 +313,16 @@
 					this.holes.push({
 						x: this.spaces[i].x,
 						y: j,
-						v: j + this.spaces[i].v - this.spaces[i].y
+						v: j + this.spaces[i].v - this.spaces[i].y,
+						i: tile.i
 					});
 				};
 				this.spaces[i] = {
 					x: i,
 					y: findTile.y + sitTile.y,
-					v: findTile.v + sitTile.v};
+					v: findTile.v + sitTile.v,
+					i: tile.i
+				};
 			};
 			this.holes.sort(this.compareH);
 			spacesM.length = 0;
@@ -302,16 +357,19 @@
 			};
 		}
 
-		boundSize(tile){
+		minSizeTile(tile) {
 			var size = this.minSize(tile, '1x1');
 			if (!size) return {
 				x: 1,
 				y: 1
 			};
-			var sizeM = this.tileLimit;
+			return size;
+		}
+
+		boundSize(tile){
 			return {
-				x: Math.min(size.x, sizeM.x),
-				y: Math.min(size.y, sizeM.y)
+				x: Math.min(tile.x, this.tileLimit.x),
+				y: Math.min(tile.y, this.tileLimit.y)
 			};
 		}
 

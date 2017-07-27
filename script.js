@@ -48,10 +48,7 @@ jQuery(document).ready(function($) {
 				[2, 1],
 				[2, 3],
 				[3, 1],
-				[3, 2],
-				[3, 4],
-				[4, 1],
-				[4, 3]
+				[3, 2]
 			];
 			scaleMask.sort(function(a, b) {
 				if (a[1] / a[0] > b[1] / b[0]) return 1;
@@ -68,7 +65,7 @@ jQuery(document).ready(function($) {
 			var place = Math.round(findPlaceMin(Math.round(logScaleMin * 10) * .1, Math.round(logScaleMax * 10) * .1, .1, delta) * 10) * .1;
 			place = findPlaceMin(place - .1,  place + .1, .01, delta);
 			var ratio = Math.pow(Math.E, place),
-				x = findPlaceMin(600, 660, 1, closer),
+				x = findPlaceMin(140, 170, 1, closer),
 				y = Math.round(x * ratio);
 
 			time = performance.now() - time;
@@ -85,7 +82,7 @@ jQuery(document).ready(function($) {
 			$('.floortiles').width($('.tab-content').width());
 			$('.floortiles').floortiles({
 				maxWidth: 2000,
-				minCol: 5,
+				minCol: 2,
 				maxCol: 5,
 				tileSize: x + 'x' + y
 			});
