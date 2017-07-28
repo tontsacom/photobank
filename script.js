@@ -81,7 +81,7 @@ jQuery(document).ready(function($) {
 			// разобраться позднее, почему необходима следующая инструкция, чтобы работало правильно и поправить!!!!!!!
 			$('.floortiles').width($('.tab-content').width());
 			$('.floortiles').floortiles({
-				maxWidth: 2000,
+				maxWidth: Infinity,
 				minCol: 2,
 				maxCol: 5,
 				tileSize: x + 'x' + y
