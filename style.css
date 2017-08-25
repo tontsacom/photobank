@@ -16,7 +16,7 @@ h1 {
 	max-width: 100%;
 	margin: 0 auto;
 }
-.floortiles-wrapper > [data-tile] {
+.floortiles-wrapper > div {
 	overflow:hidden;
 	background: url(img/scale.svg) no-repeat center;
 }

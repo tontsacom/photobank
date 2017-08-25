@@ -20,7 +20,7 @@ jQuery(document).ready(function($) {
 				logScaleMax = Math.log(4 / 1),
 				logScaleRange = logScaleMax - logScaleMin;
 
-			$("#result").append('<div class="floortiles"></div>');
+			$("#result").append('<div class="floortiles" style="width: 100%;"></div>');
 			$('.photobank img').each(function(){
 				var size = $(this).data('photobank'),
 					ratio = size.height / size.width,
@@ -76,25 +76,22 @@ jQuery(document).ready(function($) {
 			$('.floortiles > div').each(function(){
 				var tile = $('.photobank img').eq($(this).index()).data('photobank'),
 					tileRatio = scaleMask[findRatio(Math.log(tile.height / tile.width / ratio))];
-				$(this).attr('data-tile', tileRatio[0] + 'x' + tileRatio[1]);
+//				$(this).attr('data-tile', tileRatio[0] + 'x' + tileRatio[1]);
+				$(this).data('tile', tileRatio[0] + 'x' + tileRatio[1]);
 			});
-			// разобраться позднее, почему необходима следующая инструкция, чтобы работало правильно и поправить!!!!!!!
-			$('.floortiles').width($('.tab-content').width());
 			$('.floortiles').floortiles({
 				maxWidth: Infinity,
-				minCol: 2,
-				maxCol: 5,
 				tileSize: x + 'x' + y
 			});
 			console.log($('.floortiles').data('floortiles'));
 			$('.photobank img').each(function(){
-				var crop = $($('#result [data-tile]')[$(this).index()]),
+				var crop = $('.floortiles-wrapper > div').eq($(this).index()),
 					width = crop.width(),
 					height = crop.height(),
 					widthOrigin = $(this).data('photobank').width,
 					heightOrigin = $(this).data('photobank').height,
 					left = (width - height * widthOrigin / heightOrigin) / 2,
-					top = (height - width * heightOrigin / widthOrigin) / 2;
+					top = (height - width * heightOrigin / widthOrigin) / 2;console.log(crop, crop.find('img'));
 				if (height / width > heightOrigin / widthOrigin) {
 					crop.find('img').css({
 						height: '100%',
