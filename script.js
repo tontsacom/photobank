@@ -91,7 +91,7 @@ jQuery(document).ready(function($) {
 					widthOrigin = $(this).data('photobank').width,
 					heightOrigin = $(this).data('photobank').height,
 					left = (width - height * widthOrigin / heightOrigin) / 2,
-					top = (height - width * heightOrigin / widthOrigin) / 2;console.log(crop, crop.find('img'));
+					top = (height - width * heightOrigin / widthOrigin) / 2;
 				if (height / width > heightOrigin / widthOrigin) {
 					crop.find('img').css({
 						height: '100%',
