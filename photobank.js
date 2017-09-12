@@ -6,78 +6,155 @@
 (function($) {
 
 	var optionsDefault = {
-/*		tileSize: {
-			x: 200,
-			y: 150
-		},
-		tileLimit: {
-			x: 6,
-			y: 4
-		},
-		maxWidth: 1000,
-		gap: 3,
-		minCol: 2,
-		maxCol: 6,
-		tag: '',
-		animate: true,
-		animateTime: 500,
-		delayResizeTime: 500,
-		tiled: function(el, ui) {
-			// el - element,
-			// ui - object {
-				// index: (from 0),
-				// tile: {x, y},
-				// pos: {x, y},
-				// size: {x, y},
-				// tileSize: {x, y}
-			// }
-		},*/
+		layout: '1x1 1x2 1x3 1x4 2x1 2x3 3x1 3x2',
 		debug: false // only for debug purpose
 	}
 
 	class photobank {
 		constructor(element, options) {
 			this.$element = $(element);
+			this.images = [];
+			this.ratio = [];
 
-			var childs = this.$element.children();
-			if (childs.length == 0) $.error('No images in jQuery.photobank');
-			for (var i = 0; i < childs.length; i++) {
-				if (childs.get(i).tagName != 'IMG') $.error('Not the <img> tags in jQuery.photobank');
-			}
+			var that = this;
+			this.$element.children().each(function(){
+				if (this.tagName != 'IMG') $.error('Not the <img> tags in jQuery.photobank');
+				that.images.push({
+					width: this.naturalWidth,
+					height: this.naturalHeight
+				});
+				that.ratio.push(Math.log(this.naturalHeight / this.naturalWidth));
+				$(this).wrap('<div />');
+			});
 
 			$.extend(this, optionsDefault);
 
 			this.reset(options);
  		}
 
-		destructor() {
-//			this.$element.html(this.$element.children().html());
-//			this.$element.children().removeAttr('style');
+		destructor() {console.log(this.$element, this.$element.children());
+			//this.$element.html(this.$element.children().html());
+			//this.$element.children().removeAttr('style');
+			this.$element.children().each(function() {
+				$(this).children().removeAttr('style').unwrap();
+			});
 		}
 
 		reset(options) {
-/*			for (var option in options) {
-				if (option in optionsDefault) {
-					switch (option) {
-						case 'tileSize':
-							var size = this.minSize(options[option], '40x30');
-							if (!size) $.error('Wrong value ' + options[option] + ' of property ' + option + ' in jQuery.floortiles');
-							this[option] = size;
-						break;
-						case 'tileLimit':
-							var size = this.size(options[option]);
-							if (!size) $.error('Wrong value ' + options[option] + ' of property ' + option + ' in jQuery.floortiles');
-							this[option] = size;
-						break;
-						default:
-							this[option] = options[option];
-					}
-				} else {
-					$.error('Undefined property ' + option + ' in jQuery.floortiles');
-				}
+			for (var option in options) {
+				if (!(option in optionsDefault)) $.error('Undefined property \'' + option + '\' in jQuery.photobank');
+				this[option] = options[option];
 			}
-			
-			this.refresh();*/
+			var items = this.layout.split(' '),
+				couple,
+				x,
+				y;
+			if (items.length < 1) $.error('Wrong value of property \'layout\' in jQuery.photobank');
+			this.layoutArr = [];
+			for (var i = 0; i < items.length; i++) {
+				couple = items[i].split('x');
+				if (couple.length != 2 ) $.error('Wrong element \'' + items[i] + '\' of property \'layout\' in jQuery.photobank');
+				x = parseInt(couple[0]);
+				y = parseInt(couple[1]);
+				if (x < 1 || y < 1) $.error('Wrong element \'' + items[i] + '\' of property \'layout\' in jQuery.photobank');
+				this.layoutArr.push({
+					x: x,
+					y: y,
+					r: Math.log(y / x)
+				});
+			}
+			this.layoutArr.sort(function(a, b) {return a.y / a.x - b.y / b.x;});
+
+			var that = this,
+				logScaleMin = Math.floor(this.ratio.reduce(function(t, v) {return Math.min(t, v);}) * 10) * .1,
+				logScaleMax = Math.ceil(this.ratio.reduce(function(t, v) {return Math.max(t, v);}) * 10) * .1,
+				place = Math.round(findPlaceMin(
+						Math.min(logScaleMin, Math.ceil(((logScaleMin + logScaleMax) / 2 - .5) * 10) * .1),
+						Math.max(logScaleMax, Math.floor(((logScaleMin + logScaleMax) / 2 + .5) * 10) * .1),
+						.1,
+						delta
+					) * 10) * .1,
+				ratio = Math.pow(Math.E, findPlaceMin(place - .1,  place + .1, .01, delta));
+			x = findPlaceMin(140, 170, 1, closer);
+			y = Math.round(x * ratio);
+
+			this.$element.find('img').each(function(){
+				var index = $(this).parent().index(),
+					image = that.layoutArr[findRatio(Math.log(that.images[index].height / that.images[index].width / ratio))];
+				$(this).parent().data('tile', image.x + 'x' + image.y);
+			});
+
+			this.$element.floortiles({
+				maxWidth: Infinity,
+				tileSize: x + 'x' + y
+			});
+
+			this.$element.find('img').each(function(){
+				var crop = $(this).parent(),
+					image = that.images[$(this).parent().index()],
+					width = crop.width(),
+					height = crop.height(),
+					widthOrigin = image.width,
+					heightOrigin = image.height,
+					left = (width - height * widthOrigin / heightOrigin) / 2,
+					top = (height - width * heightOrigin / widthOrigin) / 2;
+				if (height / width > heightOrigin / widthOrigin) {
+					$(this).css({
+						height: '100%',
+						'margin-left': left + 'px'
+					});
+				} else {
+					$(this).css({
+						width: '100%',
+						'margin-top': top + 'px'
+					});
+				}
+			});
+	
+			function findPlaceMin(start, end, step, func) {
+				var min = func(start),
+					find = start,
+					place = start + step,
+					bound = end + step / 2,
+					value;
+				while (place < bound) {
+					value = func(place);
+					if (value < min) {
+						min = value;
+						find = place;
+					}
+					place += step;
+				}
+				return find;
+			}
+
+			function delta(shift) {
+				var i = that.ratio.length,
+					s = 0;
+				while (i--) {
+					var j = that.layoutArr.length - 1,
+						min = Math.abs(that.ratio[i] - that.layoutArr[j].r - shift);
+					while (j--) {
+						min = Math.min(min, Math.abs(that.ratio[i] - that.layoutArr[j].r - shift));
+					}
+					s += min;
+				}
+				return s;
+			}
+
+			function closer(x) {
+				return Math.abs(Math.round(x * ratio) / x / ratio - 1);
+			}
+
+			function findRatio(ratio) {
+				var i = that.layoutArr.length - 1,
+					min = Math.abs(ratio - that.layoutArr[i].r);
+				while (i--) {
+					if (min <= Math.abs(ratio - that.layoutArr[i].r)) return ++i;
+					min = Math.abs(ratio - that.layoutArr[i].r);
+				}
+				return ++i;
+			}
 		}
 
 	}
@@ -85,28 +162,25 @@
 	var methods = {
 		init: function(options) {
 			return this.each(function() {
-				var $this = $(this),
-					data = $this.data('photobank'),
-
+				var data = $(this).data('photobank');
 				if (!data) {
-					data = new photobank(this, options);
+					$(this).data('photobank', new photobank(this, options));
 				} else {
 					data.reset(options);
-				}
-
-				$this.data('photobank', data);
+				}console.log($(this).data('photobank'));
 			});
 		},
-/*
-		refresh: function() {
+
+		/*refresh: function() {
 			return this.each(function() {
 				$(this).data('photobank').refresh();
 			});
-		},
-*/
+		},*/
+
 		destroy: function() {
-			return this.each(function() {
-//				$(this).data('photobank').destructor();
+			return this.each(function() {console.log('destroy', this);
+				$(this).floortiles('destroy');
+				$(this).data('photobank').destructor();
 				$(this).removeData('photobank');
 			});
 		}

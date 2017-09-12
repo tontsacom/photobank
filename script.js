@@ -63,7 +63,7 @@ jQuery(document).ready(function($) {
 			var time = performance.now();
 
 			var place = Math.round(findPlaceMin(Math.round(logScaleMin * 10) * .1, Math.round(logScaleMax * 10) * .1, .1, delta) * 10) * .1;
-			place = findPlaceMin(place - .1,  place + .1, .01, delta);
+			place = findPlaceMin(place - .1,  place + .1, .01, delta);console.log(place);
 			var ratio = Math.pow(Math.E, place),
 				x = findPlaceMin(140, 170, 1, closer),
 				y = Math.round(x * ratio);
@@ -76,7 +76,7 @@ jQuery(document).ready(function($) {
 			$('.floortiles > div').each(function(){
 				var tile = $('.photobank img').eq($(this).index()).data('photobank'),
 					tileRatio = scaleMask[findRatio(Math.log(tile.height / tile.width / ratio))];
-//				$(this).attr('data-tile', tileRatio[0] + 'x' + tileRatio[1]);
+				//$(this).attr('data-tile', tileRatio[0] + 'x' + tileRatio[1]);
 				$(this).data('tile', tileRatio[0] + 'x' + tileRatio[1]);
 			});
 			$('.floortiles').floortiles({

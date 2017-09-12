@@ -56,9 +56,8 @@
 
 			$.extend(this, optionsDefault);
 
-			this.nextStatus = false;
 			this.reset(options);
-			this.nextStatus = true;
+			this.$element.data('floortiles', this);
 		}
 
 		destructor() {
@@ -192,7 +191,7 @@
 					size: sizeR,
 					tileSize: this.tileSize
 				});
-				if (this.animate && this.nextStatus) {
+				if (this.animate && this.$element.data('floortiles')) {
 					childs.eq(state.order2[i]).animate(
 						{
 							width: sizeR.x + 'px',
@@ -856,8 +855,7 @@
 	var methods = {
 		init: function(options) {
 			return this.each(function() {
-				var $this = $(this),
-					data = $this.data('floortiles'),
+				var data = $(this).data('floortiles'),
 					timeout;
 
 				if (!data) {
@@ -873,7 +871,6 @@
 					data.reset(options);
 				}
 
-				$this.data('floortiles', data);
 			});
 		},
 
@@ -884,7 +881,7 @@
 		},
 
 		destroy: function() {
-			return this.each(function() {
+			return this.each(function() {console.log('destroy floortiles');
 				$(window).off('.floortiles');
 				$(this).data('floortiles').destructor();
 				$(this).removeData('floortiles');

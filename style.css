@@ -8,18 +8,32 @@ h1 {
 .nav {
 	margin-bottom: 10px;
 }
-.photobank img {
-	width: 33%;
+.photobank > img {
+	float: left;
+	margin: 1px;
 }
-.floortiles-wrapper {
+.floortiles-wrapper2 {
 	position: relative;
 	max-width: 100%;
 	margin: 0 auto;
 }
 .floortiles-wrapper > div {
 	overflow:hidden;
+}
+.floortiles-wrapper2 > div {
+	overflow:hidden;
 	background: url(img/scale.svg) no-repeat center;
 }
-.floortiles-wrapper img {
+.floortiles-wrapper2 img {
 	opacity: .75;
+}
+.ui-slider {
+	margin: .6em;
+	width: 2.4em;
+}
+.ui-slider-horizontal .ui-slider-handle {
+	background: #b9b9b9;
+	width: 2.4em;
+	top: -.2em;
+	margin-left: -1.2em;
 }
