@@ -87,11 +87,11 @@
 							min: 0,
 							max: 1,
 							step: 1,
-							change: function(event, ui) {console.log(ui.value);
+							change: function(event, ui) {
 								if (ui.value == 1) {
 									$('.photobank').photobank();
-								} else {
-									if ($('.photobank').data('photobank')) $('.photobank').photobank('destroy');
+								} else if ($('.photobank').data('photobank')) {
+									$('.photobank').photobank('destroy');
 								}
 							}
 						});

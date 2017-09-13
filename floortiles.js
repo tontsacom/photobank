@@ -75,7 +75,7 @@
 							this[option] = size;
 						break;
 						case 'tileLimit':
-							var size = this.size(options[option]);
+							var size = getSize(options[option]);
 							if (!size) $.error('Wrong value ' + options[option] + ' of property ' + option + ' in jQuery.floortiles');
 							this[option] = size;
 						break;
@@ -758,19 +758,10 @@
 			};
 		}
 
-		size(tile) {
-			var couple = tile.split('x');
-			if (couple.length != 2) return false;
-			return {
-				x: parseInt(couple[0]),
-				y: parseInt(couple[1])
-			};
-		}
-
 		minSize(tile, minTile) {
-			var size = this.size(tile);
+			var size = getSize(tile),
+				sizeM = getSize(minTile);
 			if (!size) return false;
-			var sizeM = this.size(minTile);
 			return {
 				x: Math.max(size.x, sizeM.x),
 				y: Math.max(size.y, sizeM.y)
@@ -881,7 +872,7 @@
 		},
 
 		destroy: function() {
-			return this.each(function() {console.log('destroy floortiles');
+			return this.each(function() {
 				$(window).off('.floortiles');
 				$(this).data('floortiles').destructor();
 				$(this).removeData('floortiles');
@@ -900,3 +891,15 @@
 	};
 
 })(jQuery);
+
+function getSize(tile) {
+	var couple = tile.split('x');
+	if (couple.length != 2) return false;
+	var x = parseInt(couple[0]),
+		y = parseInt(couple[1]);
+	if (x < 1 || y < 1) return false;
+	return {
+		x: x,
+		y: y
+	};
+}

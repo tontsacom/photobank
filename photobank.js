@@ -32,7 +32,7 @@
 			this.reset(options);
  		}
 
-		destructor() {console.log(this.$element, this.$element.children());
+		destructor() {
 			//this.$element.html(this.$element.children().html());
 			//this.$element.children().removeAttr('style');
 			this.$element.children().each(function() {
@@ -46,21 +46,17 @@
 				this[option] = options[option];
 			}
 			var items = this.layout.split(' '),
-				couple,
+				item,
 				x,
 				y;
 			if (items.length < 1) $.error('Wrong value of property \'layout\' in jQuery.photobank');
 			this.layoutArr = [];
 			for (var i = 0; i < items.length; i++) {
-				couple = items[i].split('x');
-				if (couple.length != 2 ) $.error('Wrong element \'' + items[i] + '\' of property \'layout\' in jQuery.photobank');
-				x = parseInt(couple[0]);
-				y = parseInt(couple[1]);
-				if (x < 1 || y < 1) $.error('Wrong element \'' + items[i] + '\' of property \'layout\' in jQuery.photobank');
+				if (!(item = getSize(items[i]))) $.error('Wrong element \'' + items[i] + '\' of property \'layout\' in jQuery.photobank');
 				this.layoutArr.push({
-					x: x,
-					y: y,
-					r: Math.log(y / x)
+					x: item.x,
+					y: item.y,
+					r: Math.log(item.y / item.x)
 				});
 			}
 			this.layoutArr.sort(function(a, b) {return a.y / a.x - b.y / b.x;});
@@ -167,18 +163,12 @@
 					$(this).data('photobank', new photobank(this, options));
 				} else {
 					data.reset(options);
-				}console.log($(this).data('photobank'));
+				}
 			});
 		},
 
-		/*refresh: function() {
-			return this.each(function() {
-				$(this).data('photobank').refresh();
-			});
-		},*/
-
 		destroy: function() {
-			return this.each(function() {console.log('destroy', this);
+			return this.each(function() {
 				$(this).floortiles('destroy');
 				$(this).data('photobank').destructor();
 				$(this).removeData('photobank');
