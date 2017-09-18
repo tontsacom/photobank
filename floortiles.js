@@ -1,28 +1,921 @@
-/*
- FloorTiles v1.5 (https://github.com/tontsacom/floortiles)
- Copyright 2017
- Licensed under the MIT license
-*/
-(function(m){var q={tileSize:{x:200,y:150},tileLimit:{x:6,y:4},maxWidth:1E3,gap:3,minCol:2,maxCol:6,tag:"",animate:!0,animateTime:500,delayResizeTime:500,tiled:function(a,b){},debug:!1},n=function(a,b){this.$element=m(a);var d=this.$element.children();0==d.length&&m.error("No tiles in jQuery.floortiles");d.eq(0).data("tile")||m.error("The tile size of the element 0 in jQuery.floortiles is not specified");for(var f=d.get(0).tagName,e=1;e<d.length;e++)d.eq(e).data("tile")||m.error("The tile size of the element "+
-e+" in jQuery.floortiles is not specified"),d.get(e).tagName!=f&&m.error("Not the same tags in tiles in jQuery.floor");d.css({position:"absolute"});this.$element.wrapInner('<div class="floortiles-wrapper" style="position:relative;max-width:100%;margin:0 auto;" />');m.extend(this,q);this.reset(b);this.$element.data("floortiles",this)};n.prototype.destructor=function(){this.$element.html(this.$element.children().html());this.$element.children().removeAttr("style")};n.prototype.reset=function(a){for(var b in a)if(b in
-q)switch(b){case "tileSize":var d=this.minSize(a[b],"40x30");d||m.error("Wrong value "+a[b]+" of property "+b+" in jQuery.floortiles");this[b]=d;break;case "tileLimit":(d=getSize(a[b]))||m.error("Wrong value "+a[b]+" of property "+b+" in jQuery.floortiles");this[b]=d;break;default:this[b]=a[b]}else m.error("Undefined property "+b+" in jQuery.floortiles");this.refresh()};n.prototype.refresh=function(){this.width=Math.min(this.$element.width(),this.maxWidth);this.columns=Math.max(Math.min(Math.ceil((this.width+
-this.gap)/this.tileSize.x),this.maxCol),this.minCol);var a=this.$element.find(".floortiles-wrapper").children(),b={tiles:[],order:[],order2:[],spaces:[],holes:[],poses:[]},d,f=0,e,c=0;for(this.tags=[];f<a.length;f++){if(d=a.eq(f).data("tag")){d=d.split(" ");var g=!1;""==this.tag&&(g=!0);for(e=0;e<d.length;e++)0>this.tags.indexOf(d[e])&&this.tags.push(d[e]),!g&&0<=this.tag.indexOf(d[e])&&(g=!0)}else g=!0;g?(d=this.minSizeTile(a.eq(f).data("tile")),b.tiles.push({x:d.x,y:d.y}),b.order.push(c++),b.order2.push(f),
-b.poses.push({x:0,y:0,v:0,c:this.columns}),a.eq(f).css({display:"block"})):a.eq(f).css({display:"none"})}this.tags.sort();if(this.debug)var h=performance.now();f=this.assembly(b,this.columns,0,{i:0,y:0,v:0});this.debug&&console.log({iteration:f,time:performance.now()-h,state:b,floortiles:this});this.result(b)};n.prototype.result=function(a){for(var b=this.$element.find(".floortiles-wrapper"),d=b.children(),f=this.step(),e,c,g,h=0;h<a.tiles.length;h++)g=a.poses[h],e=this.boundSize(a.tiles[h]),c=this.boundSizeR(e,
-g.c),g={x:f.x*g.x,y:f.y*g.v},c={x:f.x*c.x-this.gap,y:f.y*c.v-this.gap},this.tiled(d.eq(a.order2[h]),{index:a.order2[h],tile:e,pos:g,size:c,tileSize:this.tileSize}),this.$element.trigger("sited.floortiles",{el:d.eq(a.order2[h]),ui:{index:a.order2[h],tile:e,pos:g,size:c,tileSize:this.tileSize}}),this.animate&&this.$element.data("floortiles")?d.eq(a.order2[h]).animate({width:c.x+"px",height:c.y+"px",left:g.x+"px",top:g.y+"px"},this.animateTime):d.eq(a.order2[h]).css({width:c.x+"px",height:c.y+"px",left:g.x+
-"px",top:g.y+"px"});b.css({width:f.x*this.columns-this.gap+"px",height:f.y*this.maxSpacesV(a,0,this.columns)-this.gap+"px"})};n.prototype.assembly=function(a,b,d,f){var e=[],c=[],g=0,h,p,m;this.sitAll(a,b,f);var n=a.holes.length;var r=this.maxSpaces(a,0,b)-this.minSpaces(a,0,b);e.push({order:a.order.join(),mode:0,holes:n,height:this.maxSpacesV(a,0,b),tear:r,chaos:this.chaos(a)});for(c=0;700>d++;){if(0<n){var k=a.order.findIndex(function(b){return b==a.holes[0].i});switch(g){case 0:for(h=1;h<n&&a.holes[h].x==
-a.holes[0].x+h&&a.holes[h].y==a.holes[0].y;h++);for(;a.holes[0].x+h<b&&!(a.spaces[a.holes[0].x+h].y>a.holes[0].y);h++);var l=k+1;for(m=p=0;l<a.order.length&&!(a.poses[a.order[l]].y>=a.poses[a.order[k]].y&&a.tiles[a.order[l]].x==h);l++)a.poses[a.order[l]].y>=a.poses[a.order[k]].y&&a.tiles[a.order[l]].x<h&&a.tiles[a.order[l]].x>p&&(p=a.tiles[a.order[l]].x,m=l);l>=a.order.length&&(l=m);if(0<l){h=a.tiles[a.order[l]].x;c=a.order.slice(k,l+1).sort(function(b,c){return a.tiles[b].x==h&&a.tiles[c].x==h||
-a.tiles[b].x!=h&&a.tiles[c].x!=h?b-c:a.tiles[b].x==h?-1:1});for(h=c.length;h--;)a.order[k+h]=c[h];c.length=0}else for(h=this.tileReshuffle(a,f);k-- >f.i&&(a.tiles[a.order[k]].x!=a.tiles[a.order[k+1]].x&&a.order.splice(k,0,a.order.splice(k+1,1)[0]),a.order[k]!=h&&a.order[k+1]!=h););break;case 1:for(p=0;k-- >f.i;)if(2==a.tiles[a.order[k]].y&&1==a.tiles[a.order[k]].x)p=1,h=k;else if(1==a.tiles[a.order[k]].y&&1==a.tiles[a.order[k]].x&&1==p){p=2;l=k;break}2==p&&a.order.splice(l,0,a.order.splice(h,1)[0])}}else{if(2>
-r)break;k=this.maxSpaces(a,0,b);h=a.spaces.findIndex(function(a){return a.y==k});for(k=a.order.length;k-- >f.i&&(a.poses[a.order[k]].x!=h||a.poses[a.order[k]].y+a.tiles[a.order[k]].y!=a.spaces[h].y););switch(g){case 0:case 1:case 2:switch(g){case 0:for(l=k;l-- >f.i&&!(a.tiles[a.order[l]].y<a.tiles[a.order[k]].y&&a.tiles[a.order[l]].x>a.tiles[a.order[k]].x););if(l>=f.i)break;e[c].mode++;case 1:for(l=k;l-- >f.i&&!(a.tiles[a.order[l]].y<a.tiles[a.order[k]].y&&a.tiles[a.order[l]].x==a.tiles[a.order[k]].x););
-if(l>=f.i)break;e[c].mode++;case 2:for(l=f.i;l<k&&(a.tiles[a.order[l]].y==a.tiles[a.order[k]].y||a.tiles[a.order[l]].x==a.tiles[a.order[k]].x);l++);l<k||e[c].mode++}if(l>=f.i&&l<k){for(h=l;l++&&(a.tiles[a.order[l]].y!=a.tiles[a.order[k]].y||a.tiles[a.order[l]].x!=a.tiles[a.order[k]].x););a.order.splice(h,0,a.order.splice(l,1)[0]);break}case 3:for(p=0;k-- >f.i;)if(2==a.tiles[a.order[k]].y&&1==a.tiles[a.order[k]].x)p=1,h=k;else if(1==a.tiles[a.order[k]].y&&1==a.tiles[a.order[k]].x&&1==p){p=2;l=k;break}2==
-p&&a.order.splice(l,0,a.order.splice(h,1)[0])}}this.sitAll(a,b,f);m=a.order.join();p=e.findIndex(function(a){return a.order==m});if(0<=p){c=e.slice(0).sort(function(a,b){return a.holes!=b.holes?a.holes-b.holes:a.tear-b.tear});1<c.length&&(c.length=1);c.sort(function(a,b){return a.holes!=b.holes?a.holes-b.holes:a.mode-b.mode});if(0==c[0].holes&&3<c[0].mode||0<c[0].holes&&1<c[0].mode){c.length=0;break}m=c[0].order;p=e.findIndex(function(a){return a.order==m});c.length=0;g=++e[p].mode;n=e[p].holes;r=
-e[p].tear;c=p;d--;this.splitOrder(a,e[p].order);this.sitAll(a,b,f);if(0==n&&2>r)break}else n=a.holes.length,r=this.maxSpaces(a,0,b)-this.minSpaces(a,0,b),e.push({order:m,mode:0,holes:n,height:this.maxSpacesV(a,0,b),tear:r,chaos:this.chaos(a)}),g=0,c=e.length-1}if(!this.debug||700>d)e.sort(function(a,b){return a.holes!=b.holes?a.holes-b.holes:a.height!=b.height?a.height-b.height:a.tear!=b.tear?a.tear-b.tear:a.chaos-b.chaos}),this.splitOrder(a,e[0].order),this.sitAll(a,b,f),n=a.holes.length;if(0<n&&
-700>d){k=this.tileReshuffle(a,f);h=a.order.findIndex(function(a){return a==k});c=a.order.slice(h).sort(function(a,b){return a-b});for(l=c.length;l--;)a.order[h+l]=c[l];this.sitAll(a,b,f);return this.assembly(a,b-1,d,{i:h,y:a.poses[a.order[h]].y,v:a.poses[a.order[h]].v})}return d};n.prototype.tileReshuffle=function(a,b){for(var d=a.order.findIndex(function(b){return b==a.holes[0].i}),f=[],e=a.holes[0].y,c=b.i;c<d;c++)f.push({i:a.order[c],y:a.poses[a.order[c]].y,y2:a.poses[a.order[c]].y+a.tiles[a.order[c]].y});
-for(d=f.filter(function(a){return a.y<=e&&a.y2>e}).sort(this.compareH);d[0].y<e;)e=d[0].y,d=f.filter(function(a){return a.y<=e&&a.y2>e}).sort(this.compareH);return d[0].i};n.prototype.sitAll=function(a,b,d){for(var f=0;f<b;f++)a.spaces[f]={y:d.y,v:d.v};a.holes.length=0;for(f=d.i;f<a.order.length;f++)a.poses[a.order[f]]=this.sit(a.tiles[a.order[f]],a,b,a.order[f])};n.prototype.sit=function(a,b,d,f){a=this.boundSize(a);if(a.x>=d){a=this.boundSizeR(a,d);var e={x:0,y:this.maxSpaces(b,0,d),v:this.maxSpacesV(b,
-0,d),c:d};for(var c=0;c<d;c++){for(var g=b.spaces[c].y;g<e.y;g++)b.holes.push({x:c,y:g,v:g-b.spaces[c].y+b.spaces[c].v,i:f});b.spaces[c]={y:e.y+a.y,v:e.v+a.v}}b.holes.sort(this.compareH);return e}a=this.boundSizeR(a,d);var h=[];for(c=0;c<d-a.x+1;c++)h[c]={x:c,y:this.maxSpaces(b,c,c+a.x),v:this.maxSpacesV(b,c,c+a.x)};h.sort(this.compareH);e=[];for(c=0;c<b.holes.length;c++){var m=b.holes[c];for(g=1;g<a.x&&(!(c+g>=b.holes.length||b.holes[c+g].x!=m.x+g||b.holes[c+g].y!=m.y)||!(b.holes[c].x+g>=d||b.spaces[b.holes[c].x+
-g].y>m.y));g++);g==a.x&&e.push(m)}var n=e.length;if(0<n&&1<a.y){e.sort(this.compareV);for(c=0;c<n-a.y+1;c++){m=e[c];for(g=1;g<a.y&&e[c+g].x==m.x&&e[c+g].y==m.y+g;g++);g==a.y&&e.push(m)}e.splice(0,n);e.sort(this.compareH)}if(0<e.length&&0>this.compareH(e[0],h[0])){e={x:e[0].x,y:e[0].y,v:e[0].v,c:d};for(c=0;c<b.holes.length&&(b.holes[c].x!=e.x||b.holes[c].y!=e.y);c++);for(g=1;g<a.x&&c+g<b.holes.length&&b.holes[c+g].x==e.x+g&&b.holes[c+g].y==e.y;g++);for(b.holes.splice(c,g).forEach(function(a){b.holes.forEach(function(b){b.i==
-a.i&&b.x==a.x&&b.y<a.y&&(b.i=f)})});g<a.x;g++){for(d=b.spaces[e.x+g].y;d<e.y;d++)b.holes.push({x:e.x+g,y:d,v:d-b.spaces[e.x+g].y+b.spaces[e.x+g].v,i:f});b.spaces[e.x+g]={x:e.x+g,y:e.y+a.y,v:e.v+a.v}}for(d=1;d<a.y;d++){for(;c<b.holes.length&&(b.holes[c].x!=e.x||b.holes[c].y!=e.y+d);c++);for(g=1;g<a.x&&c+g<b.holes.length&&b.holes[c+g].x==e.x+g&&b.holes[c+g].y==e.y+d;g++);b.holes.splice(c,g)}b.holes.sort(this.compareH);return e}e={x:h[0].x,y:h[0].y,v:h[0].v,c:d};for(c=e.x;c<e.x+a.x;c++){for(g=b.spaces[c].y;g<
-e.y;g++)b.holes.push({x:c,y:g,v:g+b.spaces[c].v-b.spaces[c].y,i:f});b.spaces[c]={y:e.y+a.y,v:e.v+a.v}}b.holes.sort(this.compareH);h.length=0;return e};n.prototype.compareH=function(a,b){return a.y!=b.y?a.y-b.y:a.x-b.x};n.prototype.compareV=function(a,b){return a.x!=b.x?a.x-b.x:a.y-b.y};n.prototype.step=function(){var a=Math.min(Math.round((this.width+this.gap)/this.columns-this.gap),this.tileSize.x);return{x:a+this.gap,y:Math.round(a/this.tileSize.x*this.tileSize.y)+this.gap}};n.prototype.minSize=
-function(a,b){var d=getSize(a),f=getSize(b);return d?{x:Math.max(d.x,f.x),y:Math.max(d.y,f.y)}:!1};n.prototype.minSizeTile=function(a){return(a=this.minSize(a,"1x1"))?a:{x:1,y:1}};n.prototype.boundSize=function(a){return{x:Math.min(a.x,this.tileLimit.x),y:Math.min(a.y,this.tileLimit.y)}};n.prototype.boundSizeR=function(a,b){return a.x>b?{x:b,y:1,v:a.y/a.x*b}:a.x==b?{x:b,y:1,v:a.y}:{x:a.x,y:a.y,v:a.y}};n.prototype.minSpaces=function(a,b,d){var f=a.spaces[b].y;for(b+=1;b<d;b++)f=Math.min(f,a.spaces[b].y);
-return f};n.prototype.maxSpaces=function(a,b,d){var f=a.spaces[b].y;for(b+=1;b<d;b++)f=Math.max(f,a.spaces[b].y);return f};n.prototype.maxSpacesV=function(a,b,d){var f=a.spaces[b].v;for(b+=1;b<d;b++)f=Math.max(f,a.spaces[b].v);return f};n.prototype.chaos=function(a){for(var b=0,d=0;b<a.order.length;b++)d+=Math.pow(b-a.order[b],2);return d};n.prototype.splitOrder=function(a,b){for(var d=b.split(","),f=d.length;f--;)a.order[f]=parseInt(d[f])};var t={init:function(a){return this.each(function(){var b=
-m(this).data("floortiles"),d;b?b.reset(a):(b=new n(this,a),m(window).on("resize.floortiles",function(){d&&clearTimeout(d);d=setTimeout(function(){b.refresh()},b.delayResizeTime)}))})},refresh:function(){return this.each(function(){m(this).data("floortiles").refresh()})},gettags:function(){return m(this.eq(0)).data("floortiles").tags},destroy:function(){return this.each(function(){m(window).off(".floortiles");m(this).data("floortiles").destructor();m(this).removeData("floortiles")})}};m.fn.floortiles=
-function(a){if(t[a])return t[a].apply(this,Array.prototype.slice.call(arguments,1));if("object"!==typeof a&&a)m.error("The method named "+a+" does not exist in jQuery.floortiles");else return t.init.apply(this,arguments)}})(jQuery);function getSize(m){var q=m.split("x");if(2!=q.length)return!1;m=parseInt(q[0]);q=parseInt(q[1]);return 1>m||1>q?!1:{x:m,y:q}};
+/*!
+ * FloorTiles v1.5 (https://github.com/tontsacom/floortiles)
+ * Copyright 2017
+ * Licensed under the MIT license
+ */
+(function($) {
+
+	const MAXITERATION = 700;
+
+	var optionsDefault = {
+		tileSize: {
+			x: 200,
+			y: 150
+		},
+		tileLimit: {
+			x: 6,
+			y: 4
+		},
+		maxWidth: 1000,
+		gap: 3,
+		minCol: 2,
+		maxCol: 6,
+		tag: '',
+		animate: true,
+		animateTime: 500,
+		delayResizeTime: 500,
+		tiled: function(el, ui) {
+			// el - element,
+			// ui - object {
+				// index: (from 0),
+				// tile: {x, y},
+				// pos: {x, y},
+				// size: {x, y},
+				// tileSize: {x, y}
+			// }
+		},
+		debug: false // only for debug purpose
+	}
+
+	class floortiles {
+		constructor(element, options) {
+			this.$element = $(element);
+
+			var childs = this.$element.children();
+			if (childs.length == 0) $.error('No tiles in jQuery.floortiles');
+			if (!childs.eq(0).data('tile')) $.error('The tile size of the element 0 in jQuery.floortiles is not specified');
+			var tag = childs.get(0).tagName;
+			for (var i = 1; i < childs.length; i++) {
+				if (!childs.eq(i).data('tile')) $.error('The tile size of the element ' + i + ' in jQuery.floortiles is not specified');
+				if (childs.get(i).tagName != tag) $.error('Not the same tags in tiles in jQuery.floor');
+			}
+			childs.css({
+				position: 'absolute'
+			});
+			this.$element.wrapInner('<div class="floortiles-wrapper" style="position:relative;max-width:100%;margin:0 auto;" />');
+
+			$.extend(this, optionsDefault);
+
+			this.reset(options);
+			this.$element.data('floortiles', this);
+		}
+
+		destructor() {
+			this.$element.html(this.$element.children().html());
+			this.$element.children().removeAttr('style');
+		}
+
+		reset(options) {
+			for (var option in options) {
+				if (option in optionsDefault) {
+					switch (option) {
+						case 'tileSize':
+							var size = this.minSize(options[option], '40x30');
+							if (!size) $.error('Wrong value ' + options[option] + ' of property ' + option + ' in jQuery.floortiles');
+							this[option] = size;
+						break;
+						case 'tileLimit':
+							var size = getSize(options[option]);
+							if (!size) $.error('Wrong value ' + options[option] + ' of property ' + option + ' in jQuery.floortiles');
+							this[option] = size;
+						break;
+						default:
+							this[option] = options[option];
+					}
+				} else {
+					$.error('Undefined property ' + option + ' in jQuery.floortiles');
+				}
+			}
+			
+			this.refresh();
+		}
+
+		refresh() {
+			this.width = Math.min(this.$element.width(), this.maxWidth);
+			this.columns = Math.max(Math.min(Math.ceil((this.width + this.gap) / this.tileSize.x), this.maxCol), this.minCol);
+
+			var childs = this.$element.find('.floortiles-wrapper').children(),
+				state = {
+					tiles: [],
+					order: [],
+					order2: [],
+					spaces: [],
+					holes: [],
+					poses: []
+				},
+				size,
+				tags,
+				i = 0,
+				j,
+				k = 0,
+				b;
+
+			this.tags = [];
+			for (; i < childs.length; i++) {
+				if (tags = childs.eq(i).data('tag')) {
+					tags = tags.split(' ');
+					b = false;
+					if (this.tag == '') b = true;
+					for (j = 0; j < tags.length; j++) {
+						if (this.tags.indexOf(tags[j]) < 0) this.tags.push(tags[j]);
+						if (!b && this.tag.indexOf(tags[j]) >= 0) b = true;
+					}
+				} else {
+					b = true;
+				}
+				if (b) {
+					size = this.minSizeTile(childs.eq(i).data('tile'));
+					state.tiles.push({
+						x: size.x,
+						y: size.y
+					});
+					state.order.push(k++);
+					state.order2.push(i);
+					state.poses.push({
+						x: 0,
+						y: 0,
+						v: 0,
+						c: this.columns
+					});
+					childs.eq(i).css({
+						display: 'block'
+					});
+				} else {
+					childs.eq(i).css({
+						display: 'none'
+					});
+				}
+			}
+			this.tags.sort();
+
+			if (this.debug) var t = performance.now(); // only for debug purpose
+
+			i = this.assembly(state, this.columns, 0, {i: 0, y: 0, v: 0});
+
+			if (this.debug) console.log({ // only for debug purpose
+				iteration: i,
+				time: performance.now() - t,
+				state: state,
+				floortiles: this
+			});
+
+			this.result(state);
+		}
+
+		result(state) {
+			var wrapper = this.$element.find('.floortiles-wrapper'),
+				childs = wrapper.children(),
+				step = this.step(),
+				tile,
+				tileR,
+				pos,
+				posR,
+				sizeR;
+
+			for (var i = 0; i < state.tiles.length; i++) {
+				pos = state.poses[i];
+				tile = this.boundSize(state.tiles[i]);
+				tileR = this.boundSizeR(tile, pos.c);
+				posR = {
+					x: step.x * pos.x,
+					y: step.y * pos.v
+				};
+				sizeR = {
+					x: step.x * tileR.x - this.gap,
+					y: step.y * tileR.v - this.gap
+				};
+
+				this.tiled(childs.eq(state.order2[i]), {
+					index: state.order2[i],
+					tile: tile,
+					pos: posR,
+					size: sizeR,
+					tileSize: this.tileSize
+				});
+				this.$element.trigger('sited.floortiles', {
+					el: childs.eq(state.order2[i]),
+					ui: {
+						index: state.order2[i],
+						tile: tile,
+						pos: posR,
+						size: sizeR,
+						tileSize: this.tileSize
+					}
+				});
+				//jQuery.proxy( function, context )
+				if (this.animate && this.$element.data('floortiles')) {
+					childs.eq(state.order2[i]).animate(
+						{
+							width: sizeR.x + 'px',
+							height: sizeR.y +'px',
+							left: posR.x + 'px',
+							top: posR.y + 'px'
+							},
+						this.animateTime
+					);
+				} else {
+					childs.eq(state.order2[i]).css({
+						width: sizeR.x + 'px',
+						height: sizeR.y +'px',
+						left: posR.x + 'px',
+						top: posR.y + 'px'
+					});
+				}
+			}
+			wrapper.css({
+				width: (step.x * this.columns - this.gap) + 'px',
+				height: (step.y * this.maxSpacesV(state, 0, this.columns) - this.gap) + 'px'
+			});
+		}
+
+		assembly(state, columns, iteration, start) {
+			var variants = [],
+				copy = [],
+				variant,
+				mode = 0,
+				holes,
+				tear,
+				j,
+				k,
+				l,
+				m,
+				n,
+				o;
+
+			this.sitAll(state, columns, start);
+			//if (this.debug) console.log(iteration, state.holes.length, state.order.join()); // only for debug purpose
+
+			holes = state.holes.length;
+			tear = this.maxSpaces(state, 0, columns) - this.minSpaces(state, 0, columns);
+			variants.push({
+				order: state.order.join(),
+				mode: 0,
+				holes: holes,
+				height: this.maxSpacesV(state, 0, columns),
+				tear: tear,
+				chaos: this.chaos(state)
+			});
+			variant = 0;
+
+			// loop of iterations (with control of the number of iterations)
+			while (iteration++ < MAXITERATION) {
+
+				if (holes > 0) {
+
+					// find the index of the tile that created the first hole
+					j = state.order.findIndex(function(el) {return el == state.holes[0].i;});
+
+					switch (mode) {
+						case 0:
+							// find the width of the hole
+							for (k = 1; k < holes; k++) {
+								if (state.holes[k].x != state.holes[0].x + k ||
+										state.holes[k].y != state.holes[0].y) break;
+							}
+
+							// increase the width of the hole if the hole peeps out
+							for (; state.holes[0].x + k < columns; k++) {
+								if (state.spaces[state.holes[0].x + k].y > state.holes[0].y) break;
+							}
+
+							// find in the tiles lying after the tile that created the first hole,
+							// the first tile, which is maximally (in width) suitable for a hole
+							for (l = j + 1, m = 0, n = 0; l < state.order.length; l++) {
+								if (state.poses[state.order[l]].y >= state.poses[state.order[j]].y &&
+										state.tiles[state.order[l]].x == k) break;
+								if (state.poses[state.order[l]].y >= state.poses[state.order[j]].y && 
+										state.tiles[state.order[l]].x < k &&
+										state.tiles[state.order[l]].x > m) {
+									m = state.tiles[state.order[l]].x;
+									n = l;
+								}
+							}
+							if (l >= state.order.length) l = n;
+
+							if (l > 0) {
+
+								// there is a tile that can be inserted into the hole
+								k = state.tiles[state.order[l]].x;
+
+								// select of the tile sub-array and its special sort
+								copy = state.order.slice(j, l + 1).sort(function(a, b) {
+									if ((state.tiles[a].x == k && state.tiles[b].x == k) ||
+											(state.tiles[a].x != k && state.tiles[b].x != k)) return a - b;
+									if (state.tiles[a].x == k) return -1;
+									return 1;
+								});
+								k = copy.length;
+								while (k--) {
+									state.order[j + k] = copy[k];
+								}
+								copy.length = 0;
+
+							} else {
+
+								// there is no tile that can be inserted into the hole
+								k = this.tileReshuffle(state, start);
+
+								// reshuffle of tiles from bottom to top with a "rebound"
+								while (j-- > start.i) {
+									if (state.tiles[state.order[j]].x != state.tiles[state.order[j + 1]].x) state.order.splice(j, 0, state.order.splice(j + 1, 1)[0]);
+									if (state.order[j] == k || state.order[j + 1] == k) break;
+								}
+
+							}
+							break;
+
+						case 1:
+							// ищем ближайшую комбинацию плиток 1x2 и 1x1
+							m = 0;
+							while (j-- > start.i) {
+								if (state.tiles[state.order[j]].y == 2 && 
+										state.tiles[state.order[j]].x == 1) {
+									m = 1;
+									k = j;
+								} else if (state.tiles[state.order[j]].y == 1 && 
+										state.tiles[state.order[j]].x == 1 && 
+										m == 1) {
+									m = 2;
+									l = j;
+									break;
+								}
+							}
+
+							// reshuffle of tiles хвоста
+							if (m == 2) state.order.splice(l, 0, state.order.splice(k, 1)[0]);
+					}
+
+				} else {
+
+					// здесь обработка "хвостов" (в раскладке без дыр)
+					if (tear < 2) break;
+
+					// определяем самую дальнюю плитку
+					j = this.maxSpaces(state, 0, columns);
+					k = state.spaces.findIndex(function(el) {return el.y == j;});
+					j = state.order.length;
+					while (j-- > start.i) {
+						if (state.poses[state.order[j]].x == k && 
+								state.poses[state.order[j]].y + state.tiles[state.order[j]].y == state.spaces[k].y) break;
+					}
+
+					switch (mode) {
+						case 0:
+						case 1:
+						case 2:
+
+							switch (mode) {
+								case 0:
+									// ищем ближайшую более раннюю плитку, меньшую по y и большую по x
+									l = j;
+									while (l-- > start.i) {
+										if (state.tiles[state.order[l]].y < state.tiles[state.order[j]].y && 
+												state.tiles[state.order[l]].x > state.tiles[state.order[j]].x) break;
+									}
+									if (l >= start.i) break;
+									variants[variant].mode++;
+								case 1:
+									// ищем ближайшую более раннюю плитку, меньшую по y и равную по x
+									l = j;
+									while (l-- > start.i) {
+										if (state.tiles[state.order[l]].y < state.tiles[state.order[j]].y && 
+												state.tiles[state.order[l]].x == state.tiles[state.order[j]].x) break;
+									}
+									if (l >= start.i) break;
+									variants[variant].mode++;
+								case 2:
+									// берем первую, не равную самой дальней, плитку в качестве ближайшей более ранней плитки
+									for (l = start.i; l < j; l++) {
+										if (state.tiles[state.order[l]].y != state.tiles[state.order[j]].y && 
+												state.tiles[state.order[l]].x != state.tiles[state.order[j]].x) break;
+									}
+									if (l < j) break;
+									variants[variant].mode++;
+							}
+
+							if (l >= start.i && l < j) {
+								// если нужная плитка была найдена среди более ранних
+								// ищем ближайшую последующую после найденной плитки, равную по размерам исходной
+								k = l;
+								while (l++) {
+									if (state.tiles[state.order[l]].y == state.tiles[state.order[j]].y && 
+											state.tiles[state.order[l]].x == state.tiles[state.order[j]].x) break;
+								}
+
+								// reshuffle of tiles хвоста
+								state.order.splice(k, 0, state.order.splice(l, 1)[0]);
+
+								break;
+							};
+
+						case 3:
+
+							// ищем ближайшую комбинацию плиток 1x2 и 1x1
+							m = 0;
+							while (j-- > start.i) {
+								if (state.tiles[state.order[j]].y == 2 && 
+										state.tiles[state.order[j]].x == 1) {
+									m = 1;
+									k = j;
+								} else if (state.tiles[state.order[j]].y == 1 && 
+										state.tiles[state.order[j]].x == 1 && 
+										m == 1) {
+									m = 2;
+									l = j;
+									break;
+								}
+							}
+
+							// reshuffle of tiles хвоста
+							if (m == 2) state.order.splice(l, 0, state.order.splice(k, 1)[0]);
+					}
+
+				}
+				this.sitAll(state, columns, start);
+				//if (this.debug) console.log(iteration, state.holes.length, state.order.join()); // only for debug purpose
+
+				n = state.order.join();
+				o = variants.findIndex(function(el) {return el.order == n;});
+				if (o >= 0) {
+					// такая раскладка уже была
+					//if (this.debug) console.log('повторяющаяся раскладка: ' + o); // only for debug purpose
+
+					/*copy = variants.slice(0).sort(function(a, b) {
+						if (a.holes != b.holes) return a.holes - b.holes;
+						return a.mode - b.mode;
+					});*/
+
+					copy = variants.slice(0).sort(function(a, b) {
+						if (a.holes != b.holes) return a.holes - b.holes;
+						return a.tear - b.tear;
+					});
+					if (copy.length > 1) copy.length = 1;
+					copy.sort(function(a, b) {
+						if (a.holes != b.holes) return a.holes - b.holes;
+						return a.mode - b.mode;
+					});
+
+					if ((copy[0].holes == 0 && copy[0].mode > 3) ||
+							(copy[0].holes > 0 && copy[0].mode > 1)) {
+						// если проверены все варианты перестановок
+
+						copy.length = 0;
+						break;
+					}
+
+					// выбор продолжения перебора
+					n = copy[0].order;
+					o = variants.findIndex(function(el) {return el.order == n;});
+					copy.length = 0;
+
+					// инкремент mode, если дырок нет
+					mode = ++variants[o].mode;
+					holes = variants[o].holes;
+					tear = variants[o].tear;
+					variant = o;
+					iteration--;
+					this.splitOrder(state, variants[o].order);
+					this.sitAll(state, columns, start);
+					if (holes == 0 && tear < 2) break;
+					continue;
+				}
+				holes = state.holes.length;
+				tear = this.maxSpaces(state, 0, columns) - this.minSpaces(state, 0, columns);
+				variants.push({
+					order: n,
+					mode: 0,
+					holes: holes,
+					height: this.maxSpacesV(state, 0, columns),
+					tear: tear,
+					chaos: this.chaos(state)
+				});
+				mode = 0;
+				variant = variants.length - 1;
+
+			}
+
+			if (!this.debug || iteration < MAXITERATION) {
+				variants.sort(function(a, b) {
+					if (a.holes != b.holes) return a.holes - b.holes;
+					if (a.height != b.height) return a.height - b.height;
+					if (a.tear != b.tear) return a.tear - b.tear;
+					return a.chaos - b.chaos;
+				});
+				this.splitOrder(state, variants[0].order);
+				this.sitAll(state, columns, start);
+				holes = state.holes.length;
+			}
+
+			if (holes > 0 && iteration < MAXITERATION) {
+
+				// holes remained and it is necessary to proceed to recursion (decrease the number of columns)
+				// надо переставить плитки (по сортировке poses по принципу compareV и, возможно, надо скорректировать
+				// процедуру tileReshuffle в данном случае, хорошо все видно, если поменять порядок mode в разделе holes > 0)
+				j = this.tileReshuffle(state, start);
+				k = state.order.findIndex(function(el) {return el == j;});
+
+				// select of the tile sub-array and its sort
+				copy = state.order.slice(k).sort(function(a, b) {return a - b;});
+				l = copy.length;
+				while (l--) {
+					state.order[k + l] = copy[l];
+				}
+				this.sitAll(state, columns, start);
+				/*if (this.debug) console.log(state, columns - 1, iteration, {
+					i: k,
+					y: state.poses[state.order[k]].y,
+					v: state.poses[state.order[k]].v
+				}); // only for debug purpose*/
+
+				return this.assembly(state, columns - 1, iteration, {i: k, y: state.poses[state.order[k]].y, v: state.poses[state.order[k]].v});
+			}
+
+			return iteration;
+		}
+
+		tileReshuffle(state, start) {
+			var i = state.order.findIndex(function(el) {return el == state.holes[0].i;}),
+				arr = [];
+
+			var j = state.holes[0].y;
+			for (var k = start.i; k < i; k++) {
+				arr.push({
+					i: state.order[k],
+					y: state.poses[state.order[k]].y,
+					y2: state.poses[state.order[k]].y + state.tiles[state.order[k]].y
+				});
+			}
+
+			// define of a tile with which to begin a new reshuffle
+			var f = arr.filter(function(el) {return el.y <= j && el.y2 > j;}).sort(this.compareH);
+			while (f[0].y < j) {
+				j = f[0].y;
+				f = arr.filter(function(el) {return el.y <= j && el.y2 > j;}).sort(this.compareH);
+			}
+			return f[0].i;
+		}
+
+		sitAll(state, columns, start) {
+			for (var i = 0; i < columns; i++) {
+				state.spaces[i] = {
+					y: start.y,
+					v: start.v
+				};
+			}
+			state.holes.length = 0;
+			for (var i = start.i; i < state.order.length; i++) {
+				state.poses[state.order[i]] = this.sit(state.tiles[state.order[i]], state, columns, state.order[i]);
+			}
+		}
+
+		sit(tile, state, columns, index) {
+			var sitTile = this.boundSize(tile),
+				findTile;
+
+			if (sitTile.x >= columns) {
+
+				// if the width of the tile is not less than the width of the window
+				sitTile = this.boundSizeR(sitTile, columns);
+
+				// position for a new tile
+				findTile = {
+					x: 0,
+					y: this.maxSpaces(state, 0, columns),
+					v: this.maxSpacesV(state, 0, columns),
+					c: columns
+				};
+
+				// define new holes and correct free ends
+				for (var i = 0; i < columns; i++) {
+					for (var j = state.spaces[i].y; j < findTile.y; j++) {
+						state.holes.push({
+							x: i,
+							y: j,
+							v: j - state.spaces[i].y + state.spaces[i].v,
+							i: index
+						});
+					};
+					state.spaces[i] = {
+						y: findTile.y + sitTile.y,
+						v: findTile.v + sitTile.v
+					};
+				}
+
+				// sort holes after adding new ones
+				state.holes.sort(this.compareH);
+
+				// return founded position
+				return findTile;
+			}
+
+			// if the width of the tile is less than the width of the window
+			sitTile = this.boundSizeR(sitTile, columns);
+
+			// define information about multiple (width equal to sitTile.x) free ends
+			var spacesM = [];
+			for (var i = 0; i < columns - sitTile.x + 1; i++) {
+				spacesM[i] = {
+					x: i,
+					y: this.maxSpaces(state, i, i + sitTile.x),
+					v: this.maxSpacesV(state, i, i + sitTile.x)
+				};
+			}
+			spacesM.sort(this.compareH);
+
+			// define information about multiple (width equal to sitTile.x) free holes
+			var holesM = [];
+			for (var i = 0; i < state.holes.length; i++) {
+				var base = state.holes[i];
+				for (var j = 1; j < sitTile.x; j++) {
+					if ((i + j >= state.holes.length || state.holes[i + j].x != base.x + j || state.holes[i + j].y != base.y) &&
+						(state.holes[i].x + j >= columns || state.spaces[state.holes[i].x + j].y > base.y)) break;
+				}
+				if (j == sitTile.x) holesM.push(base);
+			}
+
+			// define information about multiple (width equal to sitTile.x and
+			// height equal to sitTile.y) free holes
+			var l = holesM.length;
+			if (l > 0 && sitTile.y > 1) {
+				holesM.sort(this.compareV);
+				for (var i = 0; i < l - sitTile.y + 1; i++) {
+					var base = holesM[i];
+					for (var j = 1; j < sitTile.y; j++) {
+						if (holesM[i + j].x != base.x || holesM[i + j].y != base.y + j) break;
+					}
+					if (j == sitTile.y) holesM.push(base);
+				}
+				holesM.splice(0, l);
+				holesM.sort(this.compareH);
+			}
+
+			if (holesM.length > 0 && this.compareH(holesM[0], spacesM[0]) < 0) {
+
+				// if the first multiple hole is located before the first multiple free end
+				// position for a new tile
+				findTile = {
+					x: holesM[0].x,
+					y: holesM[0].y,
+					v: holesM[0].v,
+					c: columns
+				};
+
+				// define of the placement of a multiple hole
+				for (var i = 0; i < state.holes.length; i++) {
+					if (state.holes[i].x == findTile.x && state.holes[i].y == findTile.y) break;
+				}
+				for (var j = 1; j < sitTile.x && i + j < state.holes.length; j++) {
+					if (state.holes[i + j].x != findTile.x + j || state.holes[i + j].y != findTile.y) break;
+				}
+
+				// correct the information about holes due to the placement of a new tile
+				// in a multiple hole
+				state.holes.splice(i, j).forEach(function(item) {
+					state.holes.forEach(function(i) {if (i.i == item.i && i.x == item.x && i.y < item.y) i.i = index;});
+				});
+				for (; j < sitTile.x; j++) {
+					for (var k = state.spaces[findTile.x + j].y; k < findTile.y; k++) {
+
+						// define the information about new holes due to the placement
+						// of a new tile in the hole peeps out
+						state.holes.push({
+							x: findTile.x + j,
+							y: k,
+							v: k - state.spaces[findTile.x + j].y + state.spaces[findTile.x + j].v,
+							i: index
+						});
+					}
+
+					// correct the information about free ends
+					state.spaces[findTile.x + j] = {
+						x: findTile.x + j,
+						y: findTile.y + sitTile.y,
+						v: findTile.v + sitTile.v
+					};
+				}
+
+				for (var k = 1; k < sitTile.y; k++) {
+
+					// define the continuation of the placement of a multiple hole
+					for (; i < state.holes.length; i++) {
+						if (state.holes[i].x == findTile.x && state.holes[i].y == findTile.y + k) break;
+					}
+					for (var j = 1; j < sitTile.x && i + j < state.holes.length; j++) {
+						if (state.holes[i + j].x != findTile.x + j || state.holes[i + j].y != findTile.y + k) break;
+					}
+
+					// correct the information about holes due to the placement of a new tile
+					// in a multiple hole
+					state.holes.splice(i, j);
+				}
+
+				// sort holes after adding new ones
+				state.holes.sort(this.compareH);
+
+				// return founded position
+				return findTile;
+			}
+
+			// position for a new tile - the first multiple free end
+			findTile = {
+					x: spacesM[0].x,
+					y: spacesM[0].y,
+					v: spacesM[0].v,
+					c: columns
+				};
+
+			// define new holes and correct free ends
+			for (var i = findTile.x; i < findTile.x + sitTile.x; i++) {
+				for (var j = state.spaces[i].y; j < findTile.y; j++) {
+					state.holes.push({
+						x: i,
+						y: j,
+						v: j + state.spaces[i].v - state.spaces[i].y,
+						i: index
+					});
+				}
+				state.spaces[i] = {
+					y: findTile.y + sitTile.y,
+					v: findTile.v + sitTile.v
+				};
+			}
+
+			// sort holes after adding new ones
+			state.holes.sort(this.compareH);
+			spacesM.length = 0;
+
+			// return founded position
+			return findTile;
+		}
+
+		compareH(a, b) {
+			if (a.y != b.y) return a.y - b.y;
+			return a.x - b.x;
+		}
+
+		compareV(a, b) {
+			if (a.x != b.x) return a.x - b.x;
+			return a.y - b.y;
+		}
+
+		/*onSit(el, ui) {
+			console.log(this);console.log(el);console.log(ui);
+		}*/
+
+		step() {
+			var w = Math.min(Math.round(((this.width + this.gap) / this.columns) - this.gap), this.tileSize.x);
+			return {
+				x: w + this.gap,
+				y: Math.round(w / this.tileSize.x * this.tileSize.y) + this.gap
+			};
+		}
+
+		minSize(tile, minTile) {
+			var size = getSize(tile),
+				sizeM = getSize(minTile);
+			if (!size) return false;
+			return {
+				x: Math.max(size.x, sizeM.x),
+				y: Math.max(size.y, sizeM.y)
+			};
+		}
+
+		minSizeTile(tile) {
+			var size = this.minSize(tile, '1x1');
+			if (!size) return {
+				x: 1,
+				y: 1
+			};
+			return size;
+		}
+
+		boundSize(tile) {
+			return {
+				x: Math.min(tile.x, this.tileLimit.x),
+				y: Math.min(tile.y, this.tileLimit.y)
+			};
+		}
+
+		boundSizeR(tile, columns) {
+			if (tile.x > columns) return {
+				x: columns,
+				y: 1,
+				v: tile.y / tile.x * columns
+			};
+			if (tile.x == columns) return {
+				x: columns,
+				y: 1,
+				v: tile.y
+			};
+			return {
+				x: tile.x,
+				y: tile.y,
+				v: tile.y
+			};
+		}
+
+		minSpaces(state, start, end) {
+			var m = state.spaces[start].y;
+			for (var i = start + 1; i < end; i++) {
+				m = Math.min(m, state.spaces[i].y);
+			}
+			return m;
+		}
+
+		maxSpaces(state, start, end) {
+			var m = state.spaces[start].y;
+			for (var i = start + 1; i < end; i++) {
+				m = Math.max(m, state.spaces[i].y);
+			}
+			return m;
+		}
+
+		maxSpacesV(state, start, end) {
+			var m = state.spaces[start].v;
+			for (var i = start + 1; i < end; i++) {
+				m = Math.max(m, state.spaces[i].v);
+			}
+			return m;
+		}
+
+		chaos(state) {
+			for (var i = 0, c = 0; i < state.order.length; i++) {
+				c += Math.pow(i - state.order[i], 2);
+			}
+			return c;
+		}
+
+		splitOrder(state, str) {
+			var order = str.split(','),
+				i = order.length;
+			while (i--) {
+				state.order[i] = parseInt(order[i]);
+			}
+		}
+
+	}
+
+	var methods = {
+		init: function(options) {
+			return this.each(function() {
+				var data = $(this).data('floortiles'),
+					timeout;
+
+				if (!data) {
+					data = new floortiles(this, options);
+					$(window).on('resize.floortiles', function() {
+						if (timeout) clearTimeout(timeout);
+						timeout = setTimeout(function() {
+								data.refresh();
+							},
+							data.delayResizeTime);
+					});
+				} else {
+					data.reset(options);
+				}
+
+			});
+		},
+
+		refresh: function() {
+			return this.each(function() {
+				$(this).data('floortiles').refresh();
+			});
+		},
+
+		gettags: function() {
+			return $(this.eq(0)).data('floortiles').tags;
+		},
+
+		destroy: function() {
+			return this.each(function() {
+				$(window).off('.floortiles');
+				$(this).data('floortiles').destructor();
+				$(this).removeData('floortiles');
+			});
+		}
+	};
+
+	$.fn.floortiles = function(method) {
+		if (methods[method]) {
+			return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+		} else if (typeof method === 'object' || !method) {
+			return methods.init.apply(this, arguments);
+		} else {
+			$.error('The method named ' + method + ' does not exist in jQuery.floortiles' );
+		}
+	};
+
+})(jQuery);
+
+function getSize(tile) {
+	var couple = tile.split('x');
+	if (couple.length != 2) return false;
+	var x = parseInt(couple[0]),
+		y = parseInt(couple[1]);
+	if (x < 1 || y < 1) return false;
+	return {
+		x: x,
+		y: y
+	};
+}
